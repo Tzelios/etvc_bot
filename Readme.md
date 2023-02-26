@@ -1,4 +1,4 @@
-# Email To Viber Channel Bot#
+# Email To Viber Channel Bot #
 
 **A simple bot to fetch the *unseen* emails using imap and send the results to a channel in viber.**
 <br/><br/>

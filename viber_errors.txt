@@ -1,0 +1,2 @@
+2023-02-26 23:05:02.317960: 2, invalidAuthTOken, The authentication token is not valid.
+2023-02-26 23:10:40.466131: 2, invalidAuthTOken, The authentication token is not valid.

@@ -25,7 +25,7 @@ get_account_info_link = os.getenv("GET_ACCOUNT_INFO_LINK")
 imap_host = os.getenv("IMAP_HOST")
 imap_psw = os.getenv("IMAP_PSW")
 imap_user = os.getenv("IMAP_USER")
-auth_token = os.getenv("AUTH_TOKEN_VIBER")+"asdf"
+auth_token = os.getenv("AUTH_TOKEN_VIBER")
 
 # SMTP ENV VARIABLES
 smtp_server_host = os.getenv("SMPT_SERVER")

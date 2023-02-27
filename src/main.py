@@ -2,29 +2,43 @@ import imaplib
 import email
 import os
 import requests
+import time
 
+from smtplib import SMTP_SSL, SMTP_SSL_PORT
+from email.message import EmailMessage
 from time import sleep
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
+# EMAIL RELATED ENV VARIABLES
 MESSAGE_FILTER = os.getenv("MESSAGE_FILTER").split(",")
 EMAIL_WHITELIST = os.getenv("EMAIL_WHITELIST").replace(" ", "").split(",")
+
+# VIBER ENV VARIABLES
 set_webhook_link = os.getenv("SET_WEBHOOK_LINK")
 send_message_link = os.getenv("SEND_MESSAGE_LINK")
 get_account_info_link = os.getenv("GET_ACCOUNT_INFO_LINK")
+
+# IMAP ENV VARIABLES
 imap_host = os.getenv("IMAP_HOST")
 imap_psw = os.getenv("IMAP_PSW")
 imap_user = os.getenv("IMAP_USER")
-auth_token = os.getenv("AUTH_TOKEN_VIBER")
+auth_token = os.getenv("AUTH_TOKEN_VIBER")+"asdf"
+
+# SMTP ENV VARIABLES
+smtp_server_host = os.getenv("SMPT_SERVER")
+from_email = os.getenv("FROM_EMAIL")
+to_emails = os.getenv("TO_EMAILS").replace(" ", "").split(",")
+
+
 
 def main():
     try:
         imap = imaplib.IMAP4_SSL(imap_host)
         imap.login(imap_user, imap_psw)
         imap.select("Inbox")
-
 
         status, msgnums = imap.search(None, "UnSeen")
 
@@ -110,9 +124,29 @@ def viber_api_error(status):
             with open ("viber_errors.txt", "a") as f:
                 f.write(f"{datetime.now()}: {viber_error[0]}, {viber_error[1]}, {viber_error[2]}.\n")
                 f.close()
+                try:
+                    send_error_to_email(f"{datetime.now()}: {viber_error[0]}, {viber_error[1]}, {viber_error[2]}.\n")
+                except:
+                    pass
                 return -1
     return 0
 
+def send_error_to_email(e):
+    email_message = EmailMessage()
+    email_message.add_header('To', ','.join(to_emails))
+    email_message.add_header('From', from_email)
+    email_message.add_header('Subject', 'Error at eclass uth bot')
+    email_message.add_header('X-Priority', '1')
+    email_message.set_content(e)
+
+    # Connect, authenticate, and send mail
+    smtp_server = SMTP_SSL(smtp_server_host, port=SMTP_SSL_PORT)
+    smtp_server.set_debuglevel(1)  # Show SMTP server interactions
+    smtp_server.login(imap_user, imap_psw)
+    smtp_server.sendmail(from_email, to_emails, email_message.as_bytes())
+
+    # Disconnect
+    smtp_server.quit()
 
 if __name__ == "__main__":
     # Viber channel post API: https://developers.viber.com/docs/tools/channels-post-api/#error-codes

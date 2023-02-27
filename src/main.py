@@ -55,6 +55,7 @@ def main():
                                 if course in body:
                                     msg = f"From: {message.get('From')}\n\nMessage:\n\n{body}"
                                     send_msg(auth_token, super_admin_id, msg)
+                                    send_msg(auth_token, super_admin_id, "|= = = = = = = = = = = = = = = END = = = = = = = = = = = = = = =|")
                 else:
                     # Make email as unseen
                     imap.store(msgnum, '-FLAGS', '\\Seen')

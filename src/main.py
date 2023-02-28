@@ -17,27 +17,27 @@ MESSAGE_FILTER = os.getenv("MESSAGE_FILTER").split(",")
 EMAIL_WHITELIST = os.getenv("EMAIL_WHITELIST").replace(" ", "").split(",")
 
 # VIBER ENV VARIABLES
-set_webhook_link = os.getenv("SET_WEBHOOK_LINK")
-send_message_link = os.getenv("SEND_MESSAGE_LINK")
-get_account_info_link = os.getenv("GET_ACCOUNT_INFO_LINK")
+SET_WEBHOOK_LINK = os.getenv("SET_WEBHOOK_LINK")
+SEND_MESSAGE_LINK = os.getenv("SEND_MESSAGE_LINK")
+GET_ACCOUNT_INFO_LINK = os.getenv("GET_ACCOUNT_INFO_LINK")
 
 # IMAP ENV VARIABLES
-imap_host = os.getenv("IMAP_HOST")
-imap_psw = os.getenv("IMAP_PSW")
-imap_user = os.getenv("IMAP_USER")
-auth_token = os.getenv("AUTH_TOKEN_VIBER")
+IMAP_HOST = os.getenv("IMAP_HOST")
+IMAP_PSW = os.getenv("IMAP_PSW")
+IMAP_USER = os.getenv("IMAP_USER")
+AUTH_TOKEN = os.getenv("AUTH_TOKEN_VIBER")
 
 # SMTP ENV VARIABLES
-smtp_server_host = os.getenv("SMPT_SERVER")
-from_email = os.getenv("FROM_EMAIL")
-to_emails = os.getenv("TO_EMAILS").replace(" ", "").split(",")
+SMTP_SERVER_HOST = os.getenv("SMPT_SERVER")
+FROM_EMAIL = os.getenv("FROM_EMAIL")
+TO_EMAILS = os.getenv("TO_EMAILS").replace(" ", "").split(",")
 
 
 
 def main():
     try:
-        imap = imaplib.IMAP4_SSL(imap_host)
-        imap.login(imap_user, imap_psw)
+        imap = imaplib.IMAP4_SSL(IMAP_HOST)
+        imap.login(IMAP_USER, IMAP_PSW)
         imap.select("Inbox")
 
         status, msgnums = imap.search(None, "UnSeen")
@@ -68,8 +68,8 @@ def main():
                             for course in MESSAGE_FILTER:
                                 if course in body:
                                     msg = f"From: {message.get('From')}\n\nMessage:\n\n{body}"
-                                    send_msg(auth_token, super_admin_id, msg)
-                                    send_msg(auth_token, super_admin_id, "|= = = = = = = = END = = = = = = = =|")
+                                    send_msg(AUTH_TOKEN, super_admin_id, msg)
+                                    send_msg(AUTH_TOKEN, super_admin_id, "|= = = = = = = = END = = = = = = = =|")
                 else:
                     # Make email as unseen
                     imap.store(msgnum, '-FLAGS', '\\Seen')
@@ -84,10 +84,10 @@ def main():
 
 def get_admin_id():
     payload = {
-        "auth_token": auth_token
+        "auth_token": AUTH_TOKEN
     }
 
-    response = requests.post(get_account_info_link, json=payload)
+    response = requests.post(GET_ACCOUNT_INFO_LINK, json=payload)
     res_json = response.json()
     
     # Check for error in response
@@ -103,7 +103,7 @@ def send_msg(auth_token, super_admin_id, msg):
         "text": msg
     }
     try:
-        response = requests.post(send_message_link, json=payload_msg)
+        response = requests.post(SEND_MESSAGE_LINK, json=payload_msg)
         res_json = response.json()
 
         # Check for error in response
@@ -133,17 +133,17 @@ def viber_api_error(status):
 
 def send_error_to_email(e):
     email_message = EmailMessage()
-    email_message.add_header('To', ','.join(to_emails))
-    email_message.add_header('From', from_email)
+    email_message.add_header('To', ','.join(TO_EMAILS))
+    email_message.add_header('From', FROM_EMAIL)
     email_message.add_header('Subject', 'Error at eclass uth bot')
     email_message.add_header('X-Priority', '1')
     email_message.set_content(e)
 
     # Connect, authenticate, and send mail
-    smtp_server = SMTP_SSL(smtp_server_host, port=SMTP_SSL_PORT)
+    smtp_server = SMTP_SSL(SMTP_SERVER_HOST, port=SMTP_SSL_PORT)
     smtp_server.set_debuglevel(1)  # Show SMTP server interactions
-    smtp_server.login(imap_user, imap_psw)
-    smtp_server.sendmail(from_email, to_emails, email_message.as_bytes())
+    smtp_server.login(IMAP_USER, IMAP_PSW)
+    smtp_server.sendmail(FROM_EMAIL, TO_EMAILS, email_message.as_bytes())
 
     # Disconnect
     smtp_server.quit()

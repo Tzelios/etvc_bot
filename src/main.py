@@ -69,13 +69,14 @@ def main():
                                 if course in body:
                                     msg = f"From: {message.get('From')}\n\nMessage:\n\n{body}"
                                     send_msg(auth_token, super_admin_id, msg)
-                                    send_msg(auth_token, super_admin_id, "|= = = = = = = = = = = = = = = END = = = = = = = = = = = = = = =|")
+                                    send_msg(auth_token, super_admin_id, "|= = = = = = = = END = = = = = = = =|")
                 else:
                     # Make email as unseen
                     imap.store(msgnum, '-FLAGS', '\\Seen')
         imap.close()
     
     except Exception as e:
+        send_error_to_email(str(e))
         with open("errors.txt", "a") as f:
             f.write(f"{datetime.now()}: {str(e)}\n")
             f.close()
@@ -91,8 +92,7 @@ def get_admin_id():
     
     # Check for error in response
     if viber_api_error(res_json["status"]) != -1 :
-        super_admin_id = res_json["members"][0]["id"]
-        return super_admin_id
+        return res_json["members"][0]["id"]
 
 
 def send_msg(auth_token, super_admin_id, msg):
